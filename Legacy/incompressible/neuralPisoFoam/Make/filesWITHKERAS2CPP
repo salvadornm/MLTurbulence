@@ -1,0 +1,20 @@
+neuralPisoFoam.C
+tf_utils.C
+keras2cpp/src/model.c
+keras2cpp/src/baselayer.cc
+keras2cpp/src/tensor.cc
+keras2cpp/src/utils.cc
+keras2cpp/src/layers/activation.cc
+keras2cpp/src/layers/batchNormalization.cc
+keras2cpp/src/layers/conv1d.cc
+keras2cpp/src/layers/conv2d.cc
+keras2cpp/src/layers/dence.cc
+keras2cpp/src/layers/elu.cc
+keras2cpp/src/layers/embedding.cc
+keras2cpp/src/layers/flatten.cc
+keras2cpp/src/layers/locally1d.cc
+keras2cpp/src/layers/locally2d.cc
+keras2cpp/src/layers/lstm.cc
+keras2cpp/src/layers/maxPooling2d.cc
+
+EXE = $(FOAM_APPBIN)/neuralPisoFoam

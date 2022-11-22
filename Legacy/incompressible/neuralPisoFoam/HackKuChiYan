@@ -1,0 +1,23 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+echo "finding IP address..."
+sleep .5
+echo "..."
+sleep 1
+echo "..."
+sleep .5
+echo "..."
+sleep 1
+echo "IP address found"
+sleep 1
+echo "Location found:"
+sleep .5
+echo "Arup"
+echo "Kowloon Tong"
+sleep .1
+
+
+# ------------------------------------------------------------------------------

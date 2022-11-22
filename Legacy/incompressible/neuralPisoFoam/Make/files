@@ -1,0 +1,4 @@
+neuralPisoFoam.C
+tf_utils.C
+
+EXE = $(FOAM_APPBIN)/neuralPisoFoam

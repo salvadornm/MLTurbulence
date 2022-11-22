@@ -1,0 +1,36 @@
+EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -I/libtorch/include \
+    -I/libtorch/include/torch/csrc/api/include \
+    -D_GLIBCXX_USE_CXX11_ABI=0
+    -I~/libtorch/include/torch/csrc/api/include/torch \
+    -I~/libtorch/include \
+
+
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lmeshTools \
+    -lsampling \
+    -lturbulenceModels \
+    -lincompressibleTurbulenceModels \
+    -lincompressibleTransportModels \
+    -ltensorflow \
+    -L/libtorch/lib/ \
+    -L/libtorch/lib/ltorch \
+    -L/libtorch/lib/lc10
+        -W1,-rpath,$~/libtorch/lib $~/libtorch/lib/libtorch_cpu.so $~/libtorch/lib/libc10.so \
+    -W1,--no-as-needed,$~/libtorch/lib/libtorch_cpu.so \
+    -W1,-as-needed $~/libtorch/lib/libc10.so \
+    -W1,--no-as-needed,$~/libtorch/lib/libtorch.so \
+    
+    -Wl,--no-as-needed,$(TORCH_LIBRARIES)/lib/libtorch_cpu.so \
+    -Wl,--as-needed $(TORCH_LIBRARIES)/lib/libc10.so \
+    -Wl,--no-as-needed,$(TORCH_LIBRARIES)/lib/libtorch.so
