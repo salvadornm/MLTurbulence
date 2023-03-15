@@ -24,7 +24,11 @@ while (piso.correctNonOrthogonal())
         fvm::laplacian(rAU, p) == fvc::div(phiHbyA)
     );
 
-    pEqn.setReference(pRefCell, pRefValue);
+    pEqn.setReference
+    (
+        pressureReference.refCell(),
+        pressureReference.refValue()
+    );
 
     pEqn.solve();
 
@@ -38,4 +42,4 @@ while (piso.correctNonOrthogonal())
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
-fvOptions.correct(U);
+fvConstraints.constrain(U);

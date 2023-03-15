@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Copyright (C) 2011-2020 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2021 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,13 +34,13 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "tf_utils.H"
-
 #include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "kinematicMomentumTransportModel.H"
+#include "viscosityModel.H"
+#include "incompressibleMomentumTransportModels.H"
 #include "pisoControl.H"
-#include "fvOptions.H"
+#include "pressureReference.H"
+#include "fvModels.H"
+#include "fvConstraints.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,12 +63,14 @@ int main(int argc, char *argv[])
 
     while (runTime.loop())
     {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+        Info<< "Time = " << runTime.userTimeName() << nl << endl;
 
         #include "CourantNo.H"
 
         // Pressure-velocity PISO corrector
         {
+            fvModels.correct();
+
             #include "UEqn.H"
 
             // --- PISO loop
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        laminarTransport.correct();
+        viscosity->correct();
         turbulence->correct();
 
         runTime.write();

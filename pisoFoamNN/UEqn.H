@@ -1,4 +1,5 @@
 // Solve the Momentum equation
+// Added div(tau)
 
 MRF.correctBoundaryVelocity(U);
 
@@ -7,17 +8,18 @@ fvVectorMatrix UEqn
     fvm::ddt(U) + fvm::div(phi, U)
   + MRF.DDt(U)
   + turbulence->divDevSigma(U)
+  + fvc::div(TauNN)
  ==
-    fvOptions(U)
+    fvModels.source(U)
 );
 
 UEqn.relax();
 
-fvOptions.constrain(UEqn);
+fvConstraints.constrain(UEqn);
 
 if (piso.momentumPredictor())
 {
     solve(UEqn == -fvc::grad(p));
 
-    fvOptions.correct(U);
+    fvConstraints.constrain(U);
 }
