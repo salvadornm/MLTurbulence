@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "pisoFoamNN.C": "cpp"
+        "pisoFoamNN.C": "cpp",
+        "tf_utils.C": "cpp",
+        "TauEqn.H": "cpp"
     }
 }

@@ -11,27 +11,30 @@ FoamFile
     format      ascii;
     class       volTensorField;
     location    "1";
-    object      p;
+    object      TauNN;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 2 -2 0 0 0 0];
 
 internalField   uniform (
-		 33 0 0
-		 0 33 0
-		 0 0 33 
+		 0.001 0 0
+		 0 0.001 0
+		 0 0 0.001 
 		 );
 
 boundaryField
 {
     bottomWall
     {
-        type            zeroGradient;
+        type    fixedValue;
+        value   uniform   (0 0 0 0 0 0 0 0 0);
+
     }
     topWall
     {
-        type            zeroGradient;
+        type    fixedValue;
+        value   uniform   (0 0 0 0 0 0 0 0 0);
     }
     sides1_half0
     {

@@ -42,6 +42,15 @@ Description
 #include "fvModels.H"
 #include "fvConstraints.H"
 
+// [NEW] include standard C libraries
+#include <fstream>
+#include <iostream>
+#include <cstdlib>
+#include "tf_utils.H"       // include tensorflow libraries
+
+
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -70,6 +79,9 @@ int main(int argc, char *argv[])
         // Pressure-velocity PISO corrector
         {
             fvModels.correct();
+
+            //[NEW] added Tensor equation
+            #include "TauEqn.H"   
 
             #include "UEqn.H"
 
