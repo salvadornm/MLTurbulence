@@ -1,0 +1,4 @@
+SOURCE += pisoFoamNN.C
+SOURCE += tf_utils.C
+
+EXE = $(FOAM_USER_APPBIN)/pisoFoamNN

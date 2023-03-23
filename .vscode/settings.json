@@ -2,6 +2,7 @@
     "files.associations": {
         "pisoFoamNN.C": "cpp",
         "tf_utils.C": "cpp",
-        "TauEqn.H": "cpp"
+        "TauEqn.H": "cpp",
+        "decomposepardict": "cpp"
     }
 }
