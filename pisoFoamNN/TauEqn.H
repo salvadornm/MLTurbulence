@@ -1,4 +1,5 @@
 // Run the neural network to find the Tau field
+// Comment by Kacper
 
 volTensorField gradientUfull = fvc::grad(U);
 
