@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
         {
             fvModels.correct();
 
-            //[NEW] added Tensor equation
+            //[NEW] added Tensor equation with NN
             #include "TauEqn.H"   
 
             #include "UEqn.H"
