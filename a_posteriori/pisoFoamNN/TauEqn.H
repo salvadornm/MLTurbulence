@@ -9,7 +9,6 @@ int numCells = mesh.cells().size(); //This works, returns expected value
 // for (int i = 0; i < numCells; i++)
 // {
 //     gradientUWrite[i][0] = gradientU[i][0];
-
 //     gradientUWrite[i][1] = gradientU[i][1];
 //     gradientUWrite[i][2] = gradientU[i][2];
 //     gradientUWrite[i][3] = gradientU[i][3];
@@ -18,7 +17,6 @@ int numCells = mesh.cells().size(); //This works, returns expected value
 //     gradientUWrite[i][6] = gradientU[i][6];
 //     gradientUWrite[i][7] = gradientU[i][7];
 //     gradientUWrite[i][8] = gradientU[i][8];
-
 // }
 
 //hello
@@ -71,7 +69,7 @@ TF_Tensor* output_tensor_ = nullptr;
 
 // Info<< "4" << nl << endl;
 
-auto graph_ = tf_utils::LoadGraph("./NNTau003.pb");
+auto graph_ = tf_utils::LoadGraph("./model.pb");
 if (graph_ == nullptr) {
     Info << "Can't load graph" << endl;
 }
