@@ -6,47 +6,74 @@ volTensorField gradientUfull = fvc::grad(U);
 const tensorField& gradientU = gradientUfull.internalField();
 // gradientU = gradientUfull.internalField();
 int numCells = mesh.cells().size(); //This works, returns expected value
-// for (int i = 0; i < numCells; i++)
-// {
-//     gradientUWrite[i][0] = gradientU[i][0];
-//     gradientUWrite[i][1] = gradientU[i][1];
-//     gradientUWrite[i][2] = gradientU[i][2];
-//     gradientUWrite[i][3] = gradientU[i][3];
-//     gradientUWrite[i][4] = gradientU[i][4];
-//     gradientUWrite[i][5] = gradientU[i][5];
-//     gradientUWrite[i][6] = gradientU[i][6];
-//     gradientUWrite[i][7] = gradientU[i][7];
-//     gradientUWrite[i][8] = gradientU[i][8];
-// }
+ for (int i = 0; i < numCells; i++)
+ {
+     gradientUWrite[i][0] = gradientU[i][0];
+     gradientUWrite[i][1] = gradientU[i][1];
+     gradientUWrite[i][2] = gradientU[i][2];
+     gradientUWrite[i][3] = gradientU[i][3];
+     gradientUWrite[i][4] = gradientU[i][4];
+     gradientUWrite[i][5] = gradientU[i][5];
+     gradientUWrite[i][6] = gradientU[i][6];
+     gradientUWrite[i][7] = gradientU[i][7];
+     gradientUWrite[i][8] = gradientU[i][8];
+ }
 
 //hello
 
 Info<< "1" << nl << endl;
 
 const int numInputs = 9;
-const int numOutputs = 9;
+const int numOutputs = 6;
 
 const std::vector<std::int64_t> inputDims = {numCells,numInputs};
 
 // Info<< "2" << nl << endl;
 
-float gradOffset = -60;
-float gradScale = 120;
+
+
+
+float gradOffset[9] = {
+    -4.958539862185716629e+00,
+    -8.040475547313690186e+00,
+    -1.138027196114126127e+01,
+    -3.540999109158292413e+00,
+    -6.256312112789601088e+00,
+    -7.548901014961302280e+00,
+    -3.896191398613154888e+00,
+    -5.114444367692340165e+01,
+    -5.097333902958780527e+00
+};
+
+float gradScale[9] = {
+    8.089620698243379593e+00,
+    1.475831411480903625e+02,
+    2.242399184182431782e+01,
+    6.368195477407425642e+00,
+    1.102412130282027647e+01,
+    1.476183353085070848e+01,
+    7.678800913039594889e+00,
+    9.373317811122979037e+01,
+    1.089706473471596837e+01
+};
+
+//float gradOffset = -60;               //George's offset and scaling
+//float gradScale = 120;
 int gradientUCount = 0;
 std::vector<float> inputVals_;
 forAll(gradientU,cellI)
 {
     const tensor L = gradientU[cellI];
 // replace all g by 0 to see if it runs (all gradients are 0)
-    float g0 = (L.xx() - gradOffset) / gradScale;
-    float g1 = (L.xy() - gradOffset) / gradScale;
-    float g2 = (L.xz() - gradOffset) / gradScale;
-    float g3 = (L.yx() - gradOffset) / gradScale;
-    float g4 = (L.yy() - gradOffset) / gradScale;
-    float g5 = (L.yz() - gradOffset) / gradScale;
-    float g6 = (L.zx() - gradOffset) / gradScale;
-    float g7 = (L.zy() - gradOffset) / gradScale;
-    float g8 = (L.zz() - gradOffset) / gradScale;
+    float g0 = (L.xx() - gradOffset[0]) / gradScale[0];
+    float g1 = (L.xy() - gradOffset[1]) / gradScale[1];
+    float g2 = (L.xz() - gradOffset[2]) / gradScale[2];
+    float g3 = (L.yx() - gradOffset[3]) / gradScale[3];
+    float g4 = (L.yy() - gradOffset[4]) / gradScale[4];
+    float g5 = (L.yz() - gradOffset[5]) / gradScale[5];
+    float g6 = (L.zx() - gradOffset[6]) / gradScale[6];
+    float g7 = (L.zy() - gradOffset[7]) / gradScale[7];
+    float g8 = (L.zz() - gradOffset[8]) / gradScale[8];
 
     inputVals_.push_back(g0);
     inputVals_.push_back(g1);
@@ -69,7 +96,7 @@ TF_Tensor* output_tensor_ = nullptr;
 
 // Info<< "4" << nl << endl;
 
-auto graph_ = tf_utils::LoadGraph("./model.pb");
+auto graph_ = tf_utils::LoadGraph("./model_with_scaling.pb");
 if (graph_ == nullptr) {
     Info << "Can't load graph" << endl;
 }
@@ -100,19 +127,40 @@ auto data = static_cast<float*>(TF_TensorData(output_tensor_));
 
 // Info<< "8" << nl << endl;
 
-float tauOffset = -30;
-float tauScale = 60;
+
+
+float tauOffset[6] = {
+    6.858863343950361013e-07,
+    1.228890507934036447e-11,
+    5.800112038262230815e-08,
+    -1.638958986677607754e-02,
+    -1.509368470797323170e-02,
+    -1.048374631993453931e-02
+};
+
+
+float tauScale[6] = {
+    5.857573601825549758e-02,
+    2.550598112970951792e-02,
+    2.596298144001103411e-02,
+    2.231063950052669664e-02,
+    2.952483214836743031e-02,
+    1.941745822061179128e-02
+};
+
+//float tauOffset = -30;            //George's offset and scale
+//float tauScale = 60;
 for (int i = 0; i < numCells; i++)
 {
-    TauNN[i][0] = data[numOutputs*i+0]*tauScale + tauOffset;
-    TauNN[i][1] = data[numOutputs*i+1]*tauScale + tauOffset;
-    TauNN[i][2] = data[numOutputs*i+2]*tauScale + tauOffset;
-    TauNN[i][3] = data[numOutputs*i+3]*tauScale + tauOffset;
-    TauNN[i][4] = data[numOutputs*i+4]*tauScale + tauOffset;
-    TauNN[i][5] = data[numOutputs*i+5]*tauScale + tauOffset;
-    TauNN[i][6] = data[numOutputs*i+6]*tauScale + tauOffset;
-    TauNN[i][7] = data[numOutputs*i+7]*tauScale + tauOffset;
-    TauNN[i][8] = data[numOutputs*i+8]*tauScale + tauOffset;
+    TauNN[i][0] = data[numOutputs*i+0]*tauScale[0] + tauOffset[0];  //xx
+    TauNN[i][1] = data[numOutputs*i+3]*tauScale[3] + tauOffset[3];  //xy
+    TauNN[i][2] = data[numOutputs*i+4]*tauScale[4] + tauOffset[4];  //xz
+    TauNN[i][3] = data[numOutputs*i+3]*tauScale[3] + tauOffset[3];  //xy
+    TauNN[i][4] = data[numOutputs*i+1]*tauScale[1] + tauOffset[1];  //yy
+    TauNN[i][5] = data[numOutputs*i+5]*tauScale[5] + tauOffset[5];  //yz
+    TauNN[i][6] = data[numOutputs*i+4]*tauScale[4] + tauOffset[4];  //xz
+    TauNN[i][7] = data[numOutputs*i+5]*tauScale[5] + tauOffset[5];  //yz
+    TauNN[i][8] = data[numOutputs*i+2]*tauScale[2] + tauOffset[2];  //zz
 
 }
 
