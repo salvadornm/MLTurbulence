@@ -36,25 +36,27 @@ const std::vector<std::int64_t> inputDims = {numCells,numInputs};
 float gradOffset[9] = {
     -4.958539862185716629e+00,
     -8.040475547313690186e+00,
-    -1.138027196114126127e+01,
+    -11.38027196114126127e+01,
     -3.540999109158292413e+00,
     -6.256312112789601088e+00,
     -7.548901014961302280e+00,
     -3.896191398613154888e+00,
-    -5.114444367692340165e+01,
+    -51.14444367692340165e+01,
     -5.097333902958780527e+00
 };
 
+
+
 float gradScale[9] = {
     8.089620698243379593e+00,
-    1.475831411480903625e+02,
-    2.242399184182431782e+01,
+    147.5831411480903625e+02,
+    22.42399184182431782e+01,
     6.368195477407425642e+00,
-    1.102412130282027647e+01,
-    1.476183353085070848e+01,
+    11.02412130282027647e+01,
+    14.76183353085070848e+01,
     7.678800913039594889e+00,
-    9.373317811122979037e+01,
-    1.089706473471596837e+01
+    93.73317811122979037e+01,
+    10.89706473471596837e+01
 };
 
 //float gradOffset = -60;               //George's offset and scaling
@@ -96,7 +98,7 @@ TF_Tensor* output_tensor_ = nullptr;
 
 // Info<< "4" << nl << endl;
 
-auto graph_ = tf_utils::LoadGraph("./model_with_scaling.pb");
+auto graph_ = tf_utils::LoadGraph("./model_new.pb");
 if (graph_ == nullptr) {
     Info << "Can't load graph" << endl;
 }
@@ -104,7 +106,7 @@ if (graph_ == nullptr) {
 // Info<< "5" << nl << endl;
 
 auto input_op = TF_Output{TF_GraphOperationByName(graph_,"dense_input"), 0};
-auto out_op = TF_Output{TF_GraphOperationByName(graph_,"dense_2/BiasAdd"), 0};
+auto out_op = TF_Output{TF_GraphOperationByName(graph_,"dense_3/BiasAdd"), 0};
 
 // Info<< "6" << nl << endl;
 
