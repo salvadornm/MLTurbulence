@@ -19,6 +19,17 @@ for (int i = 0; i < numCells; i++)                                  //loop throu
 }
 
 
+// volVectorField Ufull = U;
+// const vectorField& Uval = Ufull.internalField();
+
+// for (int i = 0; i < numCells; i++)                                  //loop through all cells and write the velocity graident in the variable to be saved in the simulation
+// {                                                                   //this variable servese no exact purpose but to verify the gradient against the residual stresses
+//      UWrite[i][0] = Uval[i][0];
+//      UWrite[i][1] = Uval[i][1];
+//      UWrite[i][2] = Uval[i][2];
+// }
+
+
 
 // Info<< "1" << nl << endl;
 
@@ -33,30 +44,39 @@ const std::vector<std::int64_t> inputDims = {numCells,numInputs};       //create
 
 //define a vector with the offset parameters to the input
 float gradOffset[9] = {             
-    -4.958539862185716629e+00,
-    -8.040475547313690186e+00,
-    -1.138027196114126127e+01,
-    -3.540999109158292413e+00,
-    -6.256312112789601088e+00,
+    -3.900756817311048508e+00,
+    -1.444765054324473681e+02,
+    -1.137467156723141670e+01,
+    -2.693360943347215652e+00,
+    -5.753553645685315132e+00,
     -7.548901014961302280e+00,
     -3.896191398613154888e+00,
-    -5.114444367692340165e+01,
-    -5.097333902958780527e+00
+    -3.759729907005566929e+01,
+    -4.985060887993313372e+00
 };
 
 
 //define a vector with the scaling parameters to the input
 float gradScale[9] = {              
-    8.089620698243379593e+00,
-    1.475831411480903625e+02,
-    2.242399184182431782e+01,
-    6.368195477407425642e+00,
-    1.102412130282027647e+01,
-    1.476183353085070848e+01,
-    7.678800913039594889e+00,
-    9.373317811122979037e+01,
-    1.089706473471596837e+01
+    7.016355128958821297e+00,
+    2.702295231262053790e+02,
+    2.210854010656476021e+01,
+    5.251506369328126311e+00,
+    1.052136283571599051e+01,
+    1.364857028890401125e+01,
+    7.137969396484550089e+00,
+    8.018603350436205801e+01,
+    1.038676211016718298e+01
+
 };
+
+
+// float velOffset[3] = {
+// };
+
+
+// float velScale[3] = {
+// };
 
 
 int gradientUCount = 0;             //define a counter and set it to 0
@@ -64,6 +84,7 @@ std::vector<float> inputVals_;      //create a vector 'inputVals_'
 forAll(gradientU,cellI)             //loop through all cells
 {
     const tensor L = gradientU[cellI];                      //create a tensor L containing all values of gradientU for one cell
+    // const vector M = Uval[cellI]; 
 
     //scale the gradients
     float g0 = (L.xx() - gradOffset[0]) / gradScale[0];
@@ -76,6 +97,13 @@ forAll(gradientU,cellI)             //loop through all cells
     float g7 = (L.zy() - gradOffset[7]) / gradScale[7];
     float g8 = (L.zz() - gradOffset[8]) / gradScale[8];
 
+
+    // float g9 = (M.x() - velOffset[0]) / velScale[0];
+    // float g10 = (M.y() - velOffset[1]) / velScale[1];
+    // float g11 = (M.z() - velOffset[2]) / velScale[2];
+    
+
+
     //push the scaled gradients back into the 'inputVals_' vector
     inputVals_.push_back(g0);
     inputVals_.push_back(g1);
@@ -86,6 +114,10 @@ forAll(gradientU,cellI)             //loop through all cells
     inputVals_.push_back(g6);
     inputVals_.push_back(g7);
     inputVals_.push_back(g8);
+
+    // inputVals_.push_back(g9);
+    // inputVals_.push_back(g10);
+    // inputVals_.push_back(g11);
 
     gradientUCount += 1;            //increment the counter
 }
@@ -135,23 +167,23 @@ auto data = static_cast<float*>(TF_TensorData(output_tensor_));                 
 
 //define a vector with the offset parameters to the output
 float tauOffset[6] = {
-    6.858863343950361013e-07,   //xx
-    1.228890507934036447e-11,   //yy
-    5.800112038262230815e-08,   //zz
-    -1.638958986677607754e-02,  //xy
-    -1.509368470797323170e-02,  //xz
-    -1.048374631993453931e-02   //yz
+    5.688426512051591999e-07,
+    8.068402993676310146e-11,
+    2.213350414497093325e-07,
+    -1.277603468991839186e-02,
+    -1.543771831029694397e-02,
+    -8.130325771895041687e-03
 };
 
 
 //define a vector with the scaling parameters to the output
 float tauScale[6] = {
-    5.857573601825549758e-02,   //xx
-    2.550598112970951792e-02,   //yy
-    2.596298144001103411e-02,   //zz
-    2.231063950052669664e-02,   //xy
-    2.952483214836743031e-02,   //xz
-    1.941745822061179128e-02    //yz
+    5.937449358660185084e-02,
+    2.143822076922395625e-02,
+    2.301486297504369213e-02,
+    3.263759854756043133e-02,
+    3.426206730031200465e-02,
+    1.504558727375795296e-02
 };
 
 

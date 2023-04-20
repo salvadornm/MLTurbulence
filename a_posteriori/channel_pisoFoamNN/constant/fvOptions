@@ -22,7 +22,7 @@ momentumSource
     selectionMode   all;
 
     fields          (U);
-    Ubar            (0.1335 0 0);
+    Ubar            (1 0 0);
 }
 
 

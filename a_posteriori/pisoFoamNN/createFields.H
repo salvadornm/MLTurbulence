@@ -42,6 +42,21 @@ volTensorField gradientUWrite
 );
 
 
+volVectorField UWrite
+(
+		IOobject
+		(
+			"UWrite",
+			runTime.timeName(),
+			mesh,
+			IOobject::NO_READ,
+			IOobject::AUTO_WRITE
+		),
+		mesh,
+        dimLength/dimTime
+);
+
+
 Info<< "Reading field U\n" << endl;
 volVectorField U
 (
