@@ -42,6 +42,21 @@ volTensorField gradientUWrite
 );
 
 
+volTensorField strainTensor
+(
+		IOobject
+		(
+			"strainTensor",
+			runTime.timeName(),
+			mesh,
+			IOobject::NO_READ,
+			IOobject::AUTO_WRITE
+		),
+		mesh,
+        dimless/dimTime
+);
+
+
 volVectorField UWrite
 (
 		IOobject

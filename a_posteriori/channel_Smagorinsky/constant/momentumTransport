@@ -34,7 +34,7 @@ LES
 
     SmagorinskyCoeffs
     {
-        Ck      0.094;
+        Ck      0.0094;
         Ce      1.048;
     }
 }

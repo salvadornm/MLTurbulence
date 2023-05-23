@@ -41,13 +41,13 @@ perturb true;
 //wall normal circulation as a fraction of Ubar/utau
 duplus 0.25;
 //spanwise perturbation spacing in wall units
-betaPlus 200;
+betaPlus 200;  //200
 //streamwise perturbation spacing in wall units
-alphaPlus 500;
+alphaPlus 500;  //500
 //transverse decay
-sigma 0.00055;
+sigma 0.00055;  //0.00055
 //linear perturbation amplitude as a fraction of Ubar
-epsilon 0.005;
+epsilon 0.005;  //0.005
 
 
 // ************************************************************************* //

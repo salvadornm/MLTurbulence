@@ -16,11 +16,22 @@ for (int i = 0; i < numCells; i++)                                  //loop throu
      gradientUWrite[i][6] = gradientU[i][6];
      gradientUWrite[i][7] = gradientU[i][7];
      gradientUWrite[i][8] = gradientU[i][8];
+
+     strainTensor[i][0] = gradientU[i][0];
+     strainTensor[i][1] = 1/2 * (gradientU[i][1] + gradientU[i][3]);
+     strainTensor[i][2] = 1/2 * (gradientU[i][2] + gradientU[i][6]);
+     strainTensor[i][3] = 1/2 * (gradientU[i][1] + gradientU[i][3]);
+     strainTensor[i][4] = gradientU[i][4];
+     strainTensor[i][5] = 1/2 * (gradientU[i][5] + gradientU[i][7]);
+     strainTensor[i][6] = 1/2 * (gradientU[i][2] + gradientU[i][6]);
+     strainTensor[i][7] = 1/2 * (gradientU[i][5] + gradientU[i][7]);
+     strainTensor[i][8] = gradientU[i][8];
 }
 
+const tensorField& strain = strainTensor.internalField();
 
-// volVectorField Ufull = U;
-// const vectorField& Uval = Ufull.internalField();
+volVectorField Ufull = U;
+const vectorField& Uval = Ufull.internalField();
 
 // for (int i = 0; i < numCells; i++)                                  //loop through all cells and write the velocity graident in the variable to be saved in the simulation
 // {                                                                   //this variable servese no exact purpose but to verify the gradient against the residual stresses
@@ -33,7 +44,7 @@ for (int i = 0; i < numCells; i++)                                  //loop throu
 
 // Info<< "1" << nl << endl;
 
-const int numInputs = 9;            //define the number of inputs to the network
+const int numInputs = 18;            //define the number of inputs to the network
 const int numOutputs = 6;           //define the number of outputs to to the network
 
 const std::vector<std::int64_t> inputDims = {numCells,numInputs};       //create a vector variable with the dimensions: number of cells and number of inputs
@@ -43,7 +54,7 @@ const std::vector<std::int64_t> inputDims = {numCells,numInputs};       //create
 
 
 //define a vector with the offset parameters to the input
-float gradOffset[9] = {             
+float gradOffset[9] = {
     -3.900756817311048508e+00,
     -1.444765054324473681e+02,
     -1.137467156723141670e+01,
@@ -57,7 +68,7 @@ float gradOffset[9] = {
 
 
 //define a vector with the scaling parameters to the input
-float gradScale[9] = {              
+float gradScale[9] = {
     7.016355128958821297e+00,
     2.702295231262053790e+02,
     2.210854010656476021e+01,
@@ -67,16 +78,42 @@ float gradScale[9] = {
     7.137969396484550089e+00,
     8.018603350436205801e+01,
     1.038676211016718298e+01
-
 };
 
 
-// float velOffset[3] = {
-// };
+float velOffset[3] = {
+    3.718057181686162949e-03,
+    -1.677487641572952271e-01,
+    -2.791506052017211914e-01
+};
 
 
-// float velScale[3] = {
-// };
+float velScale[3] = {
+    1.240572056267410517e+00,
+    3.537947982549667358e-01,
+    5.110933333635330200e-01
+};
+
+
+
+float strainOffset[6] = {
+    -3.900756817311048508e+00,
+    -5.753553645685315132e+00,
+    -4.985060887993313372e+00,
+    -7.223845219484218205e+01,
+    -5.366458723961841315e+00,
+    -1.880007189657938582e+01
+};
+
+
+float strainScale[6] = {
+    7.016355128958821297e+00,
+    1.052136283571599051e+01,
+    1.038676211016718298e+01,
+    1.351152864862106355e+02,
+    1.025323783433850622e+01,
+    4.009687982726809707e+01
+};
 
 
 int gradientUCount = 0;             //define a counter and set it to 0
@@ -84,24 +121,30 @@ std::vector<float> inputVals_;      //create a vector 'inputVals_'
 forAll(gradientU,cellI)             //loop through all cells
 {
     const tensor L = gradientU[cellI];                      //create a tensor L containing all values of gradientU for one cell
-    // const vector M = Uval[cellI]; 
+    const vector M = Uval[cellI];
+    const tensor N = strain[cellI];
+
+    float g0 = (M.x() - velOffset[0]) / velScale[0];
+    float g1 = (M.y() - velOffset[1]) / velScale[1];
+    float g2 = (M.z() - velOffset[2]) / velScale[2];
 
     //scale the gradients
-    float g0 = (L.xx() - gradOffset[0]) / gradScale[0];
-    float g1 = (L.xy() - gradOffset[1]) / gradScale[1];
-    float g2 = (L.xz() - gradOffset[2]) / gradScale[2];
-    float g3 = (L.yx() - gradOffset[3]) / gradScale[3];
-    float g4 = (L.yy() - gradOffset[4]) / gradScale[4];
-    float g5 = (L.yz() - gradOffset[5]) / gradScale[5];
-    float g6 = (L.zx() - gradOffset[6]) / gradScale[6];
-    float g7 = (L.zy() - gradOffset[7]) / gradScale[7];
-    float g8 = (L.zz() - gradOffset[8]) / gradScale[8];
+    float g3 = (L.xx() - gradOffset[0]) / gradScale[0];
+    float g4 = (L.xy() - gradOffset[1]) / gradScale[1];
+    float g5 = (L.xz() - gradOffset[2]) / gradScale[2];
+    float g6 = (L.yx() - gradOffset[3]) / gradScale[3];
+    float g7 = (L.yy() - gradOffset[4]) / gradScale[4];
+    float g8 = (L.yz() - gradOffset[5]) / gradScale[5];
+    float g9 = (L.zx() - gradOffset[6]) / gradScale[6];
+    float g10 = (L.zy() - gradOffset[7]) / gradScale[7];
+    float g11 = (L.zz() - gradOffset[8]) / gradScale[8];
 
-
-    // float g9 = (M.x() - velOffset[0]) / velScale[0];
-    // float g10 = (M.y() - velOffset[1]) / velScale[1];
-    // float g11 = (M.z() - velOffset[2]) / velScale[2];
-    
+    float g12 = (N.xx() - strainOffset[0]) / strainScale[0];
+    float g13 = (N.yy() - strainOffset[1]) / strainScale[1];
+    float g14 = (N.zz() - strainOffset[2]) / strainScale[2];
+    float g15 = (N.xy() - strainOffset[3]) / strainScale[3];
+    float g16 = (N.xz() - strainOffset[4]) / strainScale[4];
+    float g17 = (N.yz() - strainOffset[5]) / strainScale[5];
 
 
     //push the scaled gradients back into the 'inputVals_' vector
@@ -114,10 +157,15 @@ forAll(gradientU,cellI)             //loop through all cells
     inputVals_.push_back(g6);
     inputVals_.push_back(g7);
     inputVals_.push_back(g8);
-
-    // inputVals_.push_back(g9);
-    // inputVals_.push_back(g10);
-    // inputVals_.push_back(g11);
+    inputVals_.push_back(g9);
+    inputVals_.push_back(g10);
+    inputVals_.push_back(g11);
+    inputVals_.push_back(g12);
+    inputVals_.push_back(g13);
+    inputVals_.push_back(g14);
+    inputVals_.push_back(g15);
+    inputVals_.push_back(g16);
+    inputVals_.push_back(g17);
 
     gradientUCount += 1;            //increment the counter
 }
@@ -129,7 +177,7 @@ TF_Tensor* output_tensor_ = nullptr;                                            
 
 // Info<< "4" << nl << endl;
 
-auto graph_ = tf_utils::LoadGraph("./model_new.pb");                                //load the network graph
+auto graph_ = tf_utils::LoadGraph("./model_velocity_gradient_strain.pb");                                //load the network graph
 
 //send an error message if graph cannot be loaded
 if (graph_ == nullptr) {
@@ -183,7 +231,7 @@ float tauScale[6] = {
     2.301486297504369213e-02,
     3.263759854756043133e-02,
     3.426206730031200465e-02,
-    1.504558727375795296e-02
+    1.603513716256727006e-02
 };
 
 
