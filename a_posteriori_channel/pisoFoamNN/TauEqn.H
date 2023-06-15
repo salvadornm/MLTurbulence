@@ -9,7 +9,7 @@ volTensorField gradientUfull = fvc::grad(U);                        //create a t
 volVectorField Ufull = U;
 
 int numCells = mesh.cells().size();                                 //create a variable with thenumber of cells in the mesh
-const volVectorField& C = mesh.C();
+const volVectorField& C = mesh.C();                                 //create a field with cell coordinate information
 
 for (int i = 0; i < numCells; i++)                                  //loop through all cells and write the velocity graident in the variable to be saved in the simulation
 {                                                                   //this variable servese no exact purpose but to verify the gradient against the residual stresses
@@ -23,16 +23,16 @@ for (int i = 0; i < numCells; i++)                                  //loop throu
     gradientUWrite[i][7] = gradientUfull[i][7];
     gradientUWrite[i][8] = gradientUfull[i][8];
 
-    float ycoor = C[i][1];
+    float ycoor = C[i][1];                                          //if in the upper portion of the channel, invert the gradients in xy and yz
     if (ycoor > 1.0)
     {
-        //U[i][1] = -U[i][1];
-        
         gradientUfull[i][1] = -gradientUfull[i][1];
         gradientUfull[i][3] = -gradientUfull[i][3];
         gradientUfull[i][5] = -gradientUfull[i][5];
         gradientUfull[i][7] = -gradientUfull[i][7];
     }
+
+    //calculate the strain tensor
 
     strainTensor[i][0] = gradientUfull[i][0];
     strainTensor[i][1] = 1/2 * (gradientUfull[i][1] + gradientUfull[i][3]);
@@ -45,23 +45,16 @@ for (int i = 0; i < numCells; i++)                                  //loop throu
     strainTensor[i][8] = gradientUfull[i][8];
 }
 
-const vectorField& Uval = Ufull.internalField();
+const vectorField& Uval = Ufull.internalField();                    //create a pointer to the velocity array
 const tensorField& gradientU = gradientUfull.internalField();       //create a pointer to the velocity gradient array
-const tensorField& strain = strainTensor.internalField();
-
-// for (int i = 0; i < numCells; i++)                                  //loop through all cells and write the velocity graident in the variable to be saved in the simulation
-// {                                                                   //this variable servese no exact purpose but to verify the gradient against the residual stresses
-//      UWrite[i][0] = Uval[i][0];
-//      UWrite[i][1] = Uval[i][1];
-//      UWrite[i][2] = Uval[i][2];
-// }
+const tensorField& strain = strainTensor.internalField();           //create a pointer to the strain tensor array
 
 
 
 // Info<< "1" << nl << endl;
 
 const int numInputs = 18;            //define the number of inputs to the network
-const int numOutputs = 6;           //define the number of outputs to to the network
+const int numOutputs = 6;            //define the number of outputs to to the network
 
 const std::vector<std::int64_t> inputDims = {numCells,numInputs};       //create a vector variable with the dimensions: number of cells and number of inputs
 
@@ -69,17 +62,10 @@ const std::vector<std::int64_t> inputDims = {numCells,numInputs};       //create
 
 
 
-//define a vector with the offset parameters to the input
-float gradOffset[9] = {//0, 0, 0, 0, 0, 0, 0, 0, 0
-    // -4.195938108488917351e+00,
-    // -8.040475547313690186e+00,
-    // -1.138027196114126127e+01,
-    // -3.540999109158292413e+00,
-    // -6.256312112789601088e+00,
-    // -7.548901014961302280e+00,
-    // -3.896191398613154888e+00,
-    // -3.759729907005566929e+01,
-    // -5.048898193403147161e+00
+//define arrays with the offset parameters to the input
+//define arrays with the scaling parameters to the input
+
+float gradOffset[9] = {
     -4.958539862185716629e+00,
     -8.040475547313690186e+00,
     -1.138027196114126127e+01,
@@ -92,17 +78,8 @@ float gradOffset[9] = {//0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 
-//define a vector with the scaling parameters to the input
+
 float gradScale[9] = {
-    // 7.327018944546580315e+00,
-    // 1.475831411480903625e+02,
-    // 2.211414050047460478e+01,
-    // 6.368195477407425642e+00,
-    // 1.102412130282027647e+01,
-    // 1.392841522430535406e+01,
-    // 7.137969396484550089e+00,
-    // 8.018603350436205801e+01,
-    // 1.084862902516033500e+01
     8.089620698243379593e+00,
     1.475831411480903625e+02,
     2.242399184182431782e+01,
@@ -115,10 +92,7 @@ float gradScale[9] = {
 };
 
 
-float velOffset[3] = {//0, 0, 0
-    // 3.718057181686162949e-03,
-    // -1.706818193197250366e-01,
-    // -2.791506052017211914e-01
+float velOffset[3] = {
     3.718057181686162949e-03,
     -1.706818193197250366e-01,
     -2.791506052017211914e-01
@@ -126,9 +100,6 @@ float velOffset[3] = {//0, 0, 0
 
 
 float velScale[3] = {
-    // 1.239078483078628778e+00,
-    // 3.703758120536804199e-01,
-    // 5.110933333635330200e-01
     1.256710490677505732e+00,
     3.707342892885208130e-01,
     5.154668688774108887e-01
@@ -136,13 +107,7 @@ float velScale[3] = {
 
 
 
-float strainOffset[6] = {//0, 0, 0
-    // -4.195938108488917351e+00,
-    // -6.256312112789601088e+00,
-    // -5.048898193403147161e+00,
-    // -4.157524325259146281e+00,
-    // -5.366458723961841315e+00,
-    // -1.880007189657938582e+01
+float strainOffset[6] = {
     -4.958539862185716629e+00,
     -6.256312112789601088e+00,
     -5.097333902958780527e+00,
@@ -153,12 +118,6 @@ float strainOffset[6] = {//0, 0, 0
 
 
 float strainScale[6] = {
-    // 7.327018944546580315e+00,
-    // 1.102412130282027647e+01,
-    // 1.084862902516033500e+01,
-    // 7.392936989944782056e+01,
-    // 1.060481856396654621e+01,
-    // 4.009687982726809707e+01
     8.089620698243379593e+00,
     1.102412130282027647e+01,
     1.089706473471596837e+01,
@@ -173,9 +132,10 @@ std::vector<float> inputVals_;      //create a vector 'inputVals_'
 forAll(gradientU,cellI)             //loop through all cellsWrite[
 {
     const tensor L = gradientU[cellI];                      //create a tensor L containing all values of gradientU for one cell
-    const vector M = Uval[cellI];
-    const tensor N = strain[cellI];
+    const vector M = Uval[cellI];                           //create a tensor M containing all values of Uval for one cell
+    const tensor N = strain[cellI];                         //create a tensor N containing all values of strain for one cell
 
+    //scale the velocity
     float g0 = (M.x() - velOffset[0]) / velScale[0];
     float g1 = (M.y() - velOffset[1]) / velScale[1];
     float g2 = (M.z() - velOffset[2]) / velScale[2];
@@ -191,6 +151,7 @@ forAll(gradientU,cellI)             //loop through all cellsWrite[
     float g10 = (L.zy() - gradOffset[7]) / gradScale[7];
     float g11 = (L.zz() - gradOffset[8]) / gradScale[8];
 
+    //scale the strain tensor
     float g12 = (N.xx() - strainOffset[0]) / strainScale[0];
     float g13 = (N.yy() - strainOffset[1]) / strainScale[1];
     float g14 = (N.zz() - strainOffset[2]) / strainScale[2];
@@ -199,7 +160,7 @@ forAll(gradientU,cellI)             //loop through all cellsWrite[
     float g17 = (N.yz() - strainOffset[5]) / strainScale[5];
 
 
-    //push the scaled gradients back into the 'inputVals_' vector
+    //push the scaled variables back into the 'inputVals_' vector
     inputVals_.push_back(g0);
     inputVals_.push_back(g1);
     inputVals_.push_back(g2);
@@ -266,13 +227,7 @@ auto data = static_cast<float*>(TF_TensorData(output_tensor_));                 
 
 
 //define a vector with the offset parameters to the output
-float tauOffset[6] = {//0, 0, 0, 0, 0, 0
-    // 6.858863343950361013e-07,
-    // 7.621949678042323588e-11,
-    // 5.800112038262230815e-08,
-    // -1.277603468991839186e-02,
-    // -1.502143361936969512e-02,
-    // -1.048374631993453931e-02
+float tauOffset[6] = {
     6.858863343950361013e-07,
     1.228890507934036447e-11,
     5.800112038262230815e-08,
@@ -284,12 +239,6 @@ float tauOffset[6] = {//0, 0, 0, 0, 0, 0
 
 //define a vector with the scaling parameters to the output
 float tauScale[6] = {
-    // 5.857573601825549758e-02,
-    // 2.550598106577892793e-02,
-    // 2.596298144001103411e-02,
-    // 1.869708432366901096e-02,
-    // 2.699409380492934218e-02,
-    // 1.941745822061179128e-02
     5.857573601825549758e-02,
     2.550598112970951792e-02,
     2.596298144001103411e-02,
@@ -312,7 +261,7 @@ for (int i = 0; i < numCells; i++)                                  //loop throu
     TauNN[i][7] = data[numOutputs*i+5]*tauScale[5] + tauOffset[5];  //yz
     TauNN[i][8] = data[numOutputs*i+2]*tauScale[2] + tauOffset[2];  //zz
 
-    float ycoor = C[i][1];
+    float ycoor = C[i][1];                                          //if in the top half, change the sign of tau in the xy and yz components
     if (ycoor > 1.0)
     {
         TauNN[i][1] = -TauNN[i][1];
@@ -333,6 +282,3 @@ TF_DeleteStatus(status_);
 tf_utils::DeleteSession(sess_);
 
 // Info<< "10" << nl << endl;
-
-
-// TauNN.correctBoundaryConditions();
