@@ -1,0 +1,83 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    location    "0";
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (1 0 0);
+
+boundaryField
+{
+    symmetry
+    {
+        type            symmetryPlane;
+    }
+
+    bottomWall
+    {
+        type            noSlip;
+    }
+    topWall
+    {
+        type            slip;
+    }
+    sides1
+    {
+        type            cyclic;
+    }
+    sides2
+    {
+        type            cyclic;
+    }
+    inout1
+    {
+        type            fixedValue;
+        value           uniform (1 0 0);
+    }
+    inout2
+    {
+        type            zeroGradient;
+    } 
+    
+   inlet
+    {
+   
+    //  type            fixedValue;
+    //  value           uniform (0.0 20 0);
+	
+     type codedFixedValue;
+      value           uniform (0 0 0);
+      name    sinFixedValue;
+        code            #{
+        const scalar freq = 0.0127;
+        const scalar A = 0.05;
+        const fvPatch& boundaryPatch = patch(); 
+        const vectorField& Cf = boundaryPatch.Cf();
+        const scalar t = this->db().time().value();
+
+        vectorField& field= *this;  
+        forAll(Cf,faceI) 
+        {
+          scalar z = Cf[faceI].z(); // coordinate z face
+          field[faceI] = vector(0, A*sin(6.28/240*z)*sin(6.28*freq*t) +A/2*sin(6.28/120*z+40)*sin(6.28*freq*t) +A/4*sin(6.28/60*z+10)*sin(6.28*freq*t) +A/8*sin(6.28/30*z+6)*sin(6.28*freq*t) +A/16*sin(6.28/15*z+32)*sin(6.28*freq*t) +A/32*sin(6.28/8*z+12)*sin(6.28*freq*t) +A/64*sin(6.28/4*z+4)*sin(6.28*freq*t) ,0);
+      //    field[faceI] = vector(0, 20 ,0);
+        }     
+      #};     
+    }  
+}
+
+
+// ************************************************************************* //

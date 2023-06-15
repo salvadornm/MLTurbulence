@@ -1,0 +1,125 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+convertToMeters 1;
+
+
+vertices
+(
+    (-50 0 240)
+    (0 0 240)
+    (1000 0 240)
+    (1000 40 240)
+    (0 40 240)
+    (-50 40 240)
+
+    (-50 0 0)
+    (0 0 0)
+    (1000 0 0)
+    (1000 40 0)
+    (0 40 0)
+    (-50 40 0)
+    // (0 0 0)
+    // (1099 0 0)
+    // (1099 40 0)
+    // (0 40 0)
+    // (0 0 240)
+    // (1099 0 240)
+    // (1099 40 240)
+    // (0 40 240)
+);
+
+blocks
+(
+    hex (6 7 10 11 0 1 4 5) (30 32 256) simpleGrading (0.4 36 1)
+    hex (7 8  9 10 1 2 3 4) (400 32 256) simpleGrading (8 36 1)
+//    hex (0 1 2 3 4 5 6 7) (512 32 256) simpleGrading (1 36 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    bottomWall
+    {
+        type            wall;
+        faces           //((0 4 5 1));
+        (
+            (7 8 2 1)
+        );
+    }
+    topWall
+    {
+        type            zeroGradient;
+        faces           //((3 7 6 2));
+        (
+            (11 5 4 10)
+            (10 4 3 9)
+        );
+    }
+
+    sides1
+    {
+        type            cyclic;
+        neighbourPatch  sides2;
+        faces           
+        (
+            (0 1 4 5)
+            (1 2 3 4)   //(0 1 2 3)
+        );
+    }
+
+    sides2
+    {
+        type            cyclic;
+        neighbourPatch  sides1;
+        faces           
+        (
+            (6 11 10 7)
+            (7 10 9 8)//(4 5 6 7)
+        );
+    }
+
+    inout1
+    {
+        type            patch;
+        faces           ((6 0 5 11)); //((0 4 7 3));
+    }
+ 
+
+    inout2
+    {
+        type            patch;
+        faces           ((8 9 3 2)); //((1 5 6 2));
+    }
+
+    symmetry
+    {
+        type symmetryPlane;
+        faces
+        (
+            (6 7 1 0)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //
